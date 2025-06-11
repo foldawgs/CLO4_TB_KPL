@@ -6,8 +6,13 @@ import 'package:switchcash/screens/home_screens.dart';
 import 'package:switchcash/screens/list_screen.dart';
 import 'package:switchcash/screens/welcome_screen.dart';
 import 'package:switchcash/styles/app_colors.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() => runApp(MyApp());
+
+Future<void> main() async {
+  await dotenv.load(fileName: 'assets/.env'); // atau ".env" jika itu nama file-nya
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
