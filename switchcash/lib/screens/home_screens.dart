@@ -82,12 +82,14 @@ class _HomeScreensState extends State<HomeScreens> {
         double amountInUSD = amount / fromRate;
         double convertedAmount = amountInUSD * toRate;
 
-      final formattedAmount = NumberFormat('#,###.##').format(amount);
-      final formattedConverted = NumberFormat('#,###.##').format(convertedAmount);
+        final formattedAmount = NumberFormat('#,###.##').format(amount);
+        final formattedConverted =
+            NumberFormat('#,###.##').format(convertedAmount);
 
-      setState(() {
-        result = '$formattedAmount $baseCurrency = $formattedConverted $targetCurrency';
-      });
+        setState(() {
+          result =
+              '$formattedAmount $baseCurrency = $formattedConverted $targetCurrency';
+        });
 
         await _saveToHistory(result);
       } else {
@@ -110,6 +112,7 @@ class _HomeScreensState extends State<HomeScreens> {
     });
   }
 
+  // [MODIFIKASI] Implementasi simulasi XSS di fitur search
   Future<void> _showCurrencyPicker({
     required String label,
     required String? selectedValue,
@@ -133,7 +136,6 @@ class _HomeScreensState extends State<HomeScreens> {
                     controller: searchController,
                     decoration: InputDecoration(
                       labelText: "Search $label",
-                      
                       prefixIcon: const Icon(Icons.search),
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -142,11 +144,16 @@ class _HomeScreensState extends State<HomeScreens> {
                     ),
                     onChanged: (value) {
                       setState(() {
-                        filteredList = currencyList
-                            .where((item) => item
-                                .toLowerCase()
-                                .contains(value.toLowerCase()))
-                            .toList();
+                        // [MODIFIKASI] Deteksi input XSS
+                        if (value.toLowerCase().contains('<script>')) {
+                          filteredList = ['⚠️ XSS attack detected! ⚠️'];
+                        } else {
+                          filteredList = currencyList
+                              .where((item) => item
+                                  .toLowerCase()
+                                  .contains(value.toLowerCase()))
+                              .toList();
+                        }
                       });
                     },
                   ),
@@ -159,17 +166,21 @@ class _HomeScreensState extends State<HomeScreens> {
                         final currency = filteredList[index];
                         return ListTile(
                           title: Text(currency),
-                          subtitle: Text(
-                            currencyNames[currency] ?? 'Unknown Currency',
-                            style: const TextStyle(fontSize: 12),
-                          ),
+                          subtitle: currencyList.contains(currency)
+                              ? Text(
+                                  currencyNames[currency] ?? 'Unknown Currency',
+                                  style: const TextStyle(fontSize: 12),
+                                )
+                              : null,
                           trailing: selectedValue == currency
                               ? const Icon(Icons.check, color: Colors.green)
                               : null,
-                          onTap: () {
-                            Navigator.pop(context);
-                            onSelected(currency);
-                          },
+                          onTap: currencyList.contains(currency)
+                              ? () {
+                                  Navigator.pop(context);
+                                  onSelected(currency);
+                                }
+                              : null, 
                         );
                       },
                     ),
@@ -201,7 +212,7 @@ class _HomeScreensState extends State<HomeScreens> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Origin of Currency
+
             GestureDetector(
               onTap: () => _showCurrencyPicker(
                 label: "Origin of Currency",
@@ -235,7 +246,7 @@ class _HomeScreensState extends State<HomeScreens> {
               ),
             ),
 
-            // Currency Destination
+
             GestureDetector(
               onTap: () => _showCurrencyPicker(
                 label: "Currency Destination",
@@ -251,7 +262,7 @@ class _HomeScreensState extends State<HomeScreens> {
                   labelText: "Currency Destination",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
-                    borderSide: BorderSide(color: AppColors.primary)
+                    borderSide: BorderSide(color: AppColors.primary),
                   ),
                 ),
                 child: Text(
@@ -277,7 +288,7 @@ class _HomeScreensState extends State<HomeScreens> {
                 labelText: 'Input Numbers',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8)),
-                    borderSide: BorderSide(color: AppColors.primary)
+                  borderSide: BorderSide(color: AppColors.primary),
                 ),
               ),
             ),
@@ -294,8 +305,8 @@ class _HomeScreensState extends State<HomeScreens> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.black,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
